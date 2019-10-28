@@ -1,3 +1,4 @@
 docker-compose.yml
 hadoop.env
 hbase.env
+prometheus.yml
