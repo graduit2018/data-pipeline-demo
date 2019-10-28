@@ -120,6 +120,44 @@ services:
     env_file:
       - ./hadoop.env
 
+  zoo:
+    image: zookeeper:3.4.10
+    container_name: zoo
+    networks:
+      - proxy
+    environment:
+      ZOO_MY_ID: 1
+      ZOO_SERVERS: server.1=0.0.0.0:2888:3888
+    ports:
+      - 2181:2181
+
+  hbase-master:
+    image: bde2020/hbase-master:1.0.0-hbase1.2.6
+    container_name: hbase-master
+    networks:
+      - proxy
+    hostname: hbase-master
+    env_file:
+      - ./hbase.env
+    environment:
+      SERVICE_PRECONDITION: "namenode:9870 datanode1:9864 datanode2:9864 datanode3:9864 datanode4:9864 zoo:2181"
+    ports:
+      - 16010:16010
+
+  hbase-region:
+    image: bde2020/hbase-regionserver:1.0.0-hbase1.2.6
+    container_name: hbase-regionserver
+    hostname: hbase-regionserver
+    networks:
+      - proxy
+    env_file:
+      - ./hbase.env
+    environment:
+      HBASE_CONF_hbase_regionserver_hostname: hbase-region
+      SERVICE_PRECONDITION: "namenode:9870 datanode1:9864 datanode2:9864 datanode3:9864 datanode4:9864 zoo:2181 hbase-master:16010"
+    ports:
+      - 16030:16030
+
 volumes:
   hadoop_namenode:
   hadoop_datanode1:
